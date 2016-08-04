@@ -1,4 +1,4 @@
-This is an Arduino library for the DHT series of low cost temperature/humidity sensors. 
+This is Yanoschik's modification of the Adafruit's Arduino library for the DHT series of low cost temperature/humidity sensors. 
 
 Tutorial: https://learn.adafruit.com/dht
 
