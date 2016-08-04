@@ -2,9 +2,10 @@
 
 MIT license
 written by Adafruit Industries
+modified by yanoschik :)
 */
-#ifndef DHT_H
-#define DHT_H
+#ifndef DHT_Plus_H
+#define DHT_Plus_H
 
 #if ARDUINO >= 100
  #include "Arduino.h"
@@ -30,20 +31,25 @@ written by Adafruit Industries
 
 // Define types of sensors.
 #define DHT11 11
-#define DHT22 22
 #define DHT21 21
+#define DHT22 22
 #define AM2301 21
+#define AM2302 22
+
+#define MIN_INTERVAL 2000
 
 
-class DHT {
+class DHT_Plus {
   public:
-   DHT(uint8_t pin, uint8_t type, uint8_t count=6);
+   DHT_Plus(uint8_t pin, uint8_t type, uint8_t count=6);
    void begin(void);
    float readTemperature(bool S=false, bool force=false);
    float convertCtoF(float);
    float convertFtoC(float);
-   float computeHeatIndex(float temperature, float percentHumidity, bool isFahrenheit=true);
    float readHumidity(bool force=false);
+   float computeHeatIndex(float temperature, float percentHumidity, bool isFahrenheit=true);
+   float computeDewPoint(float temp, float humid);
+   float computeDewPointSlow(float temp, float humid);
    boolean read(bool force=false);
 
  private:

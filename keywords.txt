@@ -1,12 +1,16 @@
 ###########################################
-# Syntax Coloring Map For DHT-sensor-library
+# Syntax Coloring Map For DHT_Plus
 ###########################################
 
 ###########################################
 # Datatypes (KEYWORD1)
 ###########################################
 
-DHT	KEYWORD1
+DHT_Plus  KEYWORD1
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
 
 ###########################################
 # Methods and Functions (KEYWORD2)
@@ -16,7 +20,18 @@ begin KEYWORD2
 readTemperature KEYWORD2
 convertCtoF KEYWORD2
 convertFtoC KEYWORD2
-computeHeatIndex KEYWORD2
-readHumidity KEYWORD2
-read KEYWORD2
+readHumidity  KEYWORD2
+computeHeatIndex  KEYWORD2
+computeDewPoint KEYWORD2
+computeDewPointSlow KEYWORD2
+read  KEYWORD2
 
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+DHT11 LITERAL1
+DHT21 LITERAL1
+DHT22 LITERAL1
+AM2301  LITERAL1
+AM2302  LITERAL1

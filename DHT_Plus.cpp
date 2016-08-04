@@ -2,13 +2,13 @@
 
 MIT license
 written by Adafruit Industries
+modified by yanoschik :)
 */
 
-#include "DHT.h"
+#include "DHT_Plus.h"
 
-#define MIN_INTERVAL 2000
-
-DHT::DHT(uint8_t pin, uint8_t type, uint8_t count) {
+// --------------------------------------------------
+DHT_Plus::DHT_Plus(uint8_t pin, uint8_t type, uint8_t count) {
   _pin = pin;
   _type = type;
   #ifdef __AVR
@@ -21,7 +21,8 @@ DHT::DHT(uint8_t pin, uint8_t type, uint8_t count) {
   // basd on the speed of the processor.
 }
 
-void DHT::begin(void) {
+// --------------------------------------------------
+void DHT_Plus::begin(void) {
   // set up the pins!
   pinMode(_pin, INPUT_PULLUP);
   // Using this value makes sure that millis() - lastreadtime will be
@@ -31,8 +32,9 @@ void DHT::begin(void) {
   DEBUG_PRINT("Max clock cycles: "); DEBUG_PRINTLN(_maxcycles, DEC);
 }
 
+// --------------------------------------------------
 //boolean S == Scale.  True == Fahrenheit; False == Celcius
-float DHT::readTemperature(bool S, bool force) {
+float DHT_Plus::readTemperature(bool S, bool force) {
   float f = NAN;
 
   if (read(force)) {
@@ -61,15 +63,18 @@ float DHT::readTemperature(bool S, bool force) {
   return f;
 }
 
-float DHT::convertCtoF(float c) {
+// --------------------------------------------------
+float DHT_Plus::convertCtoF(float c) {
   return c * 1.8 + 32;
 }
 
-float DHT::convertFtoC(float f) {
+// --------------------------------------------------
+float DHT_Plus::convertFtoC(float f) {
   return (f - 32) * 0.55555;
 }
 
-float DHT::readHumidity(bool force) {
+// --------------------------------------------------
+float DHT_Plus::readHumidity(bool force) {
   float f = NAN;
   if (read()) {
     switch (_type) {
@@ -88,8 +93,9 @@ float DHT::readHumidity(bool force) {
   return f;
 }
 
+// --------------------------------------------------
 //boolean isFahrenheit: True == Fahrenheit; False == Celcius
-float DHT::computeHeatIndex(float temperature, float percentHumidity, bool isFahrenheit) {
+float DHT_Plus::computeHeatIndex(float temperature, float percentHumidity, bool isFahrenheit) {
   // Using both Rothfusz and Steadman's equations
   // http://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml
   float hi;
@@ -120,11 +126,39 @@ float DHT::computeHeatIndex(float temperature, float percentHumidity, bool isFah
   return isFahrenheit ? hi : convertFtoC(hi);
 }
 
-boolean DHT::read(bool force) {
+// --------------------------------------------------
+// delta max = 0.6544 wrt dewPoint()
+// 5x faster than dewPoint()
+// reference: http://en.wikipedia.org/wiki/Dew_point
+float DHT_Plus::computeDewPoint(float temp, float humid) {
+  float a = 17.271;
+  float b = 237.7;
+  float temp_ = (a * (double) temp) / (b + (double) temp) + log( (double) humid / 100);
+  float Td = (b * temp_) / (a - temp_);
+  return Td;
+}
+
+// --------------------------------------------------
+// dewPoint function NOAA
+// reference: http://wahiduddin.net/calc/density_algorithms.htm
+float DHT_Plus::computeDewPointSlow(float temp, float humid) {
+  float ratio = 373.15 / (273.15 + temp);  // RATIO was originally named A0, possibly confusing in Arduino context
+  float sum = -7.90298 * (ratio - 1);
+  sum += 5.02808 * log10(ratio);
+  sum += -1.3816e-7 * (pow(10, (11.344 * (1 - 1/ratio ))) - 1) ;
+  sum += 8.1328e-3 * (pow(10, (-3.49149 * (ratio - 1))) - 1) ;
+  sum += log10(1013.246);
+  float VP = pow(10, sum - 3) * humid;
+  float T = log(VP/0.61078);   // temp var
+  return (241.88 * T) / (17.558 - T);
+}
+
+// --------------------------------------------------
+boolean DHT_Plus::read(bool force) {
   // Check if sensor was read less than two seconds ago and return early
   // to use last reading.
   uint32_t currenttime = millis();
-  if (!force && ((currenttime - _lastreadtime) < 2000)) {
+  if (!force && ((currenttime - _lastreadtime) < MIN_INTERVAL)) {
     return _lastresult; // return last correct measurement
   }
   _lastreadtime = currenttime;
@@ -227,6 +261,7 @@ boolean DHT::read(bool force) {
   }
 }
 
+// --------------------------------------------------
 // Expect the signal line to be at the specified level for a period of time and
 // return a count of loop cycles spent at that level (this cycle count can be
 // used to compare the relative time of two pulses).  If more than a millisecond
@@ -234,7 +269,7 @@ boolean DHT::read(bool force) {
 // This is adapted from Arduino's pulseInLong function (which is only available
 // in the very latest IDE versions):
 //   https://github.com/arduino/Arduino/blob/master/hardware/arduino/avr/cores/arduino/wiring_pulse.c
-uint32_t DHT::expectPulse(bool level) {
+uint32_t DHT_Plus::expectPulse(bool level) {
   uint32_t count = 0;
   // On AVR platforms use direct GPIO port access as it's much faster and better
   // for catching pulses that are 10's of microseconds in length:
